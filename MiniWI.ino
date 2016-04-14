@@ -139,7 +139,7 @@ byte RHp2;  // Right Hand pinky key 2 (pitch change -1)
 byte RHp3;  // Right Hand pinky key 3 (pitch change -2)
 byte OCTup; // Octave switch key (pitch change +12)  // Keep this? Octave joystick button?
 
-int joyOct; // Octave shifting by joystick (pitch change steps of 12) value from -1 to +1, 0 is center pos
+int joyOct; // Octave shifting by joystick (pitch change steps of 12) value from -2 to +2, 0 is center pos
 
 //_______________________________________________________________________________________________ SETUP
 

@@ -1,7 +1,7 @@
 /*
 NAME:                 MiniWI 
 WRITTEN BY:           JOHAN BERGLUND
-CREDITS:              MIDI routines borrowed from TOM SCARFF at midikits.net, state machine flow from the Gordophone blog by GORDON GOOD
+CREDITS:              State machine from the Gordophone blog by GORDON GOOD
 DATE:                 2016-04-13
 FILE SAVED AS:        MiniWI.ino
 FOR:                  Arduino Pro Mini, ATmega328, version with breakouts for A6 and A7
@@ -103,7 +103,6 @@ int pitchBend;
 int oldpb=8192;
 
 int breathLevel;
-int oldbreath=0;
 
 int xOctaves;
 int yOctaves;

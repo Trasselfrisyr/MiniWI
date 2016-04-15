@@ -78,7 +78,7 @@ HARDWARE NOTES:
 
 // Send CC data no more than every CC_INTERVAL
 // milliseconds
-#define CC_INTERVAL 70 
+#define CC_INTERVAL 40 
 
 
 //variables setup
@@ -89,7 +89,7 @@ unsigned long breath_on_time = 0L; // Time when breath sensor value went over th
 int initial_breath_value;          // The breath value at the time we observed the transition
 
 long lastDebounceTime = 0;         // The last time the fingering was changed
-long debounceDelay = 20;           // The debounce time; increase if the output flickers
+long debounceDelay = 30;           // The debounce time; increase if the output flickers
 int lastFingering = 0;             // Keep the last fingering value for debouncing
 
 byte MIDIchannel=0;                // MIDI channel 1
@@ -198,7 +198,7 @@ void loop() {
 
         // We should be at tonguing peak, so set velocity based on current pressureSensor value        
         // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 0-127
-        velocity = map(constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max),ON_Thr,breath_max,0,127);
+        velocity = map(constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max),ON_Thr,breath_max,7,127);
         midiSend((0x90 | MIDIchannel), fingeredNote, velocity); // send Note On message for new note
         activeNote=fingeredNote;
         state = NOTE_ON;

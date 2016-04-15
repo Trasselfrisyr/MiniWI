@@ -94,8 +94,6 @@ int lastFingering = 0;             // Keep the last fingering value for debounci
 
 byte MIDIchannel=0;                // MIDI channel 1
 
-byte modLSB;
-byte modMSB;
 int modLevel;
 int oldmod=0;
 
@@ -104,8 +102,6 @@ int pitchMSB;
 int pitchBend;
 int oldpb=8192;
 
-byte breathLSB;
-byte breathMSB;
 int breathLevel;
 int oldbreath=0;
 
@@ -198,15 +194,12 @@ void loop() {
         readOctaves();
      
         //calculate midi note number from pressed keys and octave shifts
-        fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && RH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup;
+        fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup;
         fingeredNote=fingeredNote+joyOct*12;
 
-        // We should be at tonguing peak, so set velocity based on current pressureSensor value
-        velocity = pressureSensor; 
-        if (initial_breath_value > velocity) { // If initial value is greater than value after delay, go with initial value instead
-          velocity=initial_breath_value;
-        }
-        velocity = map(constrain(velocity,ON_Thr,breath_max),ON_Thr,breath_max,0,16383);
+        // We should be at tonguing peak, so set velocity based on current pressureSensor value        
+        // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 0-127
+        velocity = map(constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max),ON_Thr,breath_max,0,127);
         midiSend((0x90 | MIDIchannel), fingeredNote, velocity); // send Note On message for new note
         activeNote=fingeredNote;
         state = NOTE_ON;
@@ -235,7 +228,7 @@ void loop() {
     readOctaves();
      
     //calculate midi note number from pressed keys and octave shifts
-    fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && RH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup;
+    fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup;
     fingeredNote=fingeredNote+joyOct*12;
 
     if (fingeredNote != lastFingering){ //
@@ -292,17 +285,14 @@ void pitch_bend(){
 void modulation(){
   modLevel = analogRead(A5); // read voltage on analog pin A5
   if (modLevel > modsHi_Thr){
-    modLevel = map(modLevel,modsHi_Thr,1023,0,16383); // go from 0 to full modulation when off center threshold going right(?)
+    modLevel = map(modLevel,modsHi_Thr,1023,0,127); // go from 0 to full modulation when off center threshold going right(?)
   } else if (modLevel < modsLo_Thr){
-    modLevel = map(modLevel,0,modsLo_Thr,16383,0); // go from 0 to full modulation when off center threshold going left(?)
+    modLevel = map(modLevel,0,modsLo_Thr,127,0); // go from 0 to full modulation when off center threshold going left(?)
   } else {
     modLevel = 0; // zero modulation in center position
   }
   if (modLevel != oldmod){  // only send midi data if modulation has changed from previous value
-    modLSB =  modLevel & 0x007F;
-    modMSB = (modLevel >>7) & 0x007F;
-    midiSend((0xB0 | MIDIchannel), 1, modLSB);
-    midiSend((0xB0 | MIDIchannel), 33, modMSB);  // this much precision needed? disable to reduce MIDI chatter
+    midiSend((0xB0 | MIDIchannel), 1, modLevel);
     oldmod=modLevel;
   }
 }
@@ -311,14 +301,8 @@ void modulation(){
 
 void breath(){
   breathLevel = analogRead(A3); // read voltage on analog pin A3
-  breathLevel = map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,16383);
-  breathLSB =  breathLevel & 0x007F;
-  //breathMSB = (breathLevel >>7) & 0x007F;  // this much precision is just a waste of MIDI space
-  //if(breathLSB != oldbreath){  // only send midi data if breath level has changed from previous value (needed at all?)
-    midiSend((0xB0 | MIDIchannel), 2, breathLSB);
-    //midiSend((0xB0 | MIDIchannel), 34, breathMSB);  // this much precision is just a waste of MIDI space
-    //oldbreath=breathLSB;
-  //}
+  breathLevel = map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,127);
+  midiSend((0xB0 | MIDIchannel), 2, breathLevel);
 }
 //***********************************************************
 

@@ -19,7 +19,7 @@ HARDWARE NOTES:
 *    all other pins - unconnected                         \___2___/
 *
 * Left hand thumb joystick controls octaves.
-* X and Y are connected to Arduino pins A6 and A7, 
+* X and Y are connected to Arduino pins A6 and A7,  
 * this means a Pro Mini version with breakouts for these pins is required.
 * 
 *       +1   +2

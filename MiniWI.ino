@@ -49,7 +49,7 @@ HARDWARE NOTES:
 * 6: n/c
 *     
 *     
-* All key switches connect Ardino digital inputs (with internal pullups) to GND
+* All key switches connect Arduino digital inputs (with internal pullups) to GND
 * 
 */
 
@@ -197,7 +197,7 @@ void loop() {
         fingeredNote=fingeredNote+joyOct*12;
 
         // We should be at tonguing peak, so set velocity based on current pressureSensor value        
-        // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 0-127
+        // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 7 to 127
         velocity = map(constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max),ON_Thr,breath_max,7,127);
         midiSend((0x90 | MIDIchannel), fingeredNote, velocity); // send Note On message for new note
         activeNote=fingeredNote;

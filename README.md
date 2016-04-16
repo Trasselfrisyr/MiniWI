@@ -51,5 +51,5 @@ HARDWARE NOTES:
 * 6: n/c
 *     
 *     
-* All key switches connect Ardino digital inputs (with internal pullups) to GND
+* All key switches connect Arduino digital inputs (with internal pullups) to GND
 * 

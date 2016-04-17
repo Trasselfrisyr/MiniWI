@@ -13,6 +13,13 @@ http://gordophone.blogspot.se/2013/01/a-series-basics-of-diy-wind-controllers.ht
 
 Hardware notes for connection of MIDI, pressure sensor, keys and joysticks are available in the MiniWI.ino file.
 
+The controller is made to work well with synthesizers using wind controller patches from Patchman Music, with the breath data sent by CC #2 (Breath). For testing I’ve been using their wind controller soundbank for Roland JV-1010.
+
+http://www.patchmanmusic.com
+
+Or you can make your own patches optimized for breath control. Pointers for doing that can also be found on the Patchman website.
+
+
 Questions and suggestions are welcome. Just send them to johan@helgo.net.
 
 -Johan Berglund

@@ -78,7 +78,7 @@ HARDWARE NOTES:
 
 // Send CC data no more than every CC_INTERVAL
 // milliseconds
-#define CC_INTERVAL 10 
+#define CC_INTERVAL 15 
 
 
 //variables setup

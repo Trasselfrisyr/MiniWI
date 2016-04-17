@@ -1,55 +1,18 @@
 # MiniWI
 MIDI woodwind controller
 
-NAME:                 MiniWI 
-WRITTEN BY:           JOHAN BERGLUND
-CREDITS:              State machine from the Gordophone blog by GORDON GOOD
-DATE:                 2016-04-13
-FILE SAVED AS:        MiniWI.ino
-FOR:                  Arduino Pro Mini, ATmega328, version with breakouts for A6 and A7
-CLOCK:                16.00 MHz CRYSTAL                                        
-PROGRAMME FUNCTION:   Wind Controller with EWI style key setup, Freescale MPX5010GP breath sensor, PS2 style thumb joysticks 
-                      for octave selection and pb/mod control, output to 5-pin DIN MIDI 
+2016-04-17
 
-HARDWARE NOTES:
-* For the MIDI connection, attach a MIDI out Female 180 Degree 5-Pin DIN socket to Arduino.
-* Socket is seen from solder tags at rear.
-* DIN-5 pinout is:                                         _______ 
-*    pin 2 - GND                                          /       \
-*    pin 4 - 220 ohm resistor to +5V                     | 1     3 |  MIDI jack
-*    pin 5 - Arduino Pin 1 (TX) via a 220 ohm resistor   |  4   5  |
-*    all other pins - unconnected                         \___2___/
-*
-* Left hand thumb joystick controls octaves.
-* X and Y are connected to Arduino pins A6 and A7, 
-* this means a Pro Mini version with breakouts for these pins is required.
-* 
-*       +1   +2
-*       ^
-* -1  < o >  +1
-*       v
-* -2   -1
-*
-* Right hand thumb joystick controls pitch bend and modulation.
-* Pitch bend and modulation are connected to Arduino pins A4 and A5,
-* not on DIP rows.
-* 
-*     PB up
-*       ^
-* Mod < o > Mod
-*       v
-*     PB dn
-*     
-* The Freescale MPX5010GP pressure sensor output (V OUT) is connected to Arduino pin A3.
-* 
-* Sensor pinout
-* 1: V OUT (pin with indent)
-* 2: GND
-* 3: VCC (to 5V)    
-* 4: n/c
-* 5: n/c
-* 6: n/c
-*     
-*     
-* All key switches connect Arduino digital inputs (with internal pullups) to GND
-* 
+This MIDI controller is running on an Arduino Pro Mini with Atmega328 16MHz/5V. It makes use of breakouts for analog pins A6 and A7, so it needs a Pro Mini version with these breakouts. The pressure sensor used for the project is the Freescale MPX5010GP. Fingering is reverse engineered from Akai EWI and note values are calculated from pressed keys. For details on this, read my guest post on the Gordophone blog. 
+
+http://gordophone.blogspot.se/2016/04/guest-post-alternative-way-of-note.html
+
+Details on the state machine approach for handling the events is also available on Gordon's blog where I borrowed it from. He's got a step-by-step how-to on DIY wind controllers that I highly recommend.
+
+http://gordophone.blogspot.se/2013/01/a-series-basics-of-diy-wind-controllers.html
+
+Hardware notes for connection of MIDI, pressure sensor, keys and joysticks are available in the MiniWI.ino file.
+
+Questions and suggestions are welcome. Just send them to johan@helgo.net.
+
+-Johan Berglund

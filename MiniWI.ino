@@ -103,6 +103,7 @@ int pitchBend;
 int oldpb=8192;
 
 int breathLevel;
+int oldBreath=0;
 
 int xOctaves;
 int yOctaves;
@@ -212,6 +213,7 @@ void loop() {
     if (pressureSensor < ON_Thr) {
       // Value has fallen below threshold - turn the note off
       midiSend((0x80 | MIDIchannel), activeNote, velocity); //  send Note Off message 
+      oldBreath=0;
       state = NOTE_OFF;
     } else {
       // Is it time to send more CC data?
@@ -300,6 +302,8 @@ void modulation(){
 
 void breath(){
   breathLevel = analogRead(A3); // read voltage on analog pin A3
+  breathLevel = oldBreath*0.8+breathLevel*0.2;
+  oldBreath = breathLevel;
   breathLevel = map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,127);
   midiSend((0xB0 | MIDIchannel), 2, breathLevel);
 }

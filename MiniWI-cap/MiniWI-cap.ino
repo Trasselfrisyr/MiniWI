@@ -132,8 +132,8 @@ byte RH3;   // Right Hand key 3 (pitch change -2)
 byte RHp1=0;  // Right Hand pinky key 1 (pitch change +1) --- Not used in this version
 byte RHp2;  // Right Hand pinky key 2 (pitch change -1)
 byte RHp3;  // Right Hand pinky key 3 (pitch change -2)
-byte OCTup=0; // Octave switch key (pitch change +12)  
-byte OCTdn=0; // Octave switch key (pitch change -12) 
+byte OCTup=0; // Octave switch key (pitch change +12) --- Not used in this version 
+byte OCTdn=0; // Octave switch key (pitch change -12) --- Not used in this version
 
 int joyOct; // Octave shifting by joystick (pitch change steps of 12) value from -2 to +2, 0 is center pos
 

@@ -2,7 +2,7 @@
 #include <Adafruit_MPR121.h>
 
 /*
-NAME:                 MiniWI 
+NAME:                 MiniWI Cap Touch ver.
 WRITTEN BY:           JOHAN BERGLUND
 CREDITS:              State machine from the Gordophone blog by GORDON GOOD
 DATE:                 2016-04-13
@@ -132,8 +132,8 @@ byte RH3;   // Right Hand key 3 (pitch change -2)
 byte RHp1=0;  // Right Hand pinky key 1 (pitch change +1) --- Not used in this version
 byte RHp2;  // Right Hand pinky key 2 (pitch change -1)
 byte RHp3;  // Right Hand pinky key 3 (pitch change -2)
-byte OCTup; // Octave switch key (pitch change +12)  
-byte OCTdn; // Octave switch key (pitch change -12) 
+byte OCTup=0; // Octave switch key (pitch change +12)  
+byte OCTdn=0; // Octave switch key (pitch change -12) 
 
 int joyOct; // Octave shifting by joystick (pitch change steps of 12) value from -2 to +2, 0 is center pos
 
@@ -322,13 +322,11 @@ void readSwitches(){
   LH2=(touchValue & (1 << 2));
   LH3=(touchValue & (1 << 3));
   LHp1=(touchValue & (1 << 4));
-  RH1=(touchValue & (1 << 5));
-  RH2=(touchValue & (1 << 6));
-  RH3=(touchValue & (1 << 7));
-  RHp2=(touchValue & (1 << 8));
-  RHp3=(touchValue & (1 << 9));
-  OCTup=(touchValue & (1 << 10));
-  OCTdn=(touchValue & (1 << 11));
+  RH1=(touchValue & (1 << 6));
+  RH2=(touchValue & (1 << 7));
+  RH3=(touchValue & (1 << 8));
+  RHp2=(touchValue & (1 << 9));
+  RHp3=(touchValue & (1 << 10));
   //calculate midi note number from pressed keys
-  fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup;
+  fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup-12*OCTdn;
 }

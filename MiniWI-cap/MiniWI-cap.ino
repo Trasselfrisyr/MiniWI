@@ -317,16 +317,16 @@ void readOctaves(){
 void readSwitches(){  
   // Read switches and put value in variables
   uint16_t touchValue = touchSensor.touched();
-  LH1=(touchValue & (1 << 0));
-  LHb=(touchValue & (1 << 1));
-  LH2=(touchValue & (1 << 2));
-  LH3=(touchValue & (1 << 3));
-  LHp1=(touchValue & (1 << 4));
-  RH1=(touchValue & (1 << 6));
-  RH2=(touchValue & (1 << 7));
-  RH3=(touchValue & (1 << 8));
-  RHp2=(touchValue & (1 << 9));
-  RHp3=(touchValue & (1 << 10));
+  LH1=((touchValue >> 0) & 0x01);
+  LHb=((touchValue >> 1) & 0x01);
+  LH2=((touchValue >> 2) & 0x01);
+  LH3=((touchValue >> 3) & 0x01);
+  LHp1=((touchValue >> 4) & 0x01);
+  RH1=((touchValue >> 6) & 0x01);
+  RH2=((touchValue >> 7) & 0x01);
+  RH3=((touchValue >> 8) & 0x01);
+  RHp2=((touchValue >> 9) & 0x01);
+  RHp3=((touchValue >> 10) & 0x01);
   //calculate midi note number from pressed keys
   fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup-12*OCTdn;
 }

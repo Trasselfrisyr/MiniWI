@@ -65,6 +65,7 @@ HARDWARE NOTES:
 #define modsHi_Thr 611  // High threshold for mod stick center
 #define octsLo_Thr 311  // Low threshold for octave stick center
 #define octsHi_Thr 711  // High threshold for octave stick center
+#define PB_sens 4095    // Pitch Bend sensitivity 0 to 8191 where 8191 is full pb range
 
 // The three states of our state machine
 
@@ -110,7 +111,7 @@ byte velocity;       // remapped midi velocity from breath sensor
 
 int fingeredNote;    // note calculated from fingering (switches) and octave joystick position
 byte activeNote;     // note playing
-byte startNote=61;   // set startNote to C# (change this value in steps of 12 to start in other octaves)
+byte startNote=73;   // set startNote to C# (change this value in steps of 12 to start in other octaves)
 
 byte midistatus=0;
 byte x;
@@ -250,9 +251,9 @@ void pitch_bend(){
   int pitchMSB;
   pitchBend = analogRead(A0); // read voltage on analog pin A0
   if (pitchBend > modsHi_Thr){
-    pitchBend = map(pitchBend,modsHi_Thr,1023,8192,16383); // go from 8192 to 16383 (full pb up) when off center threshold going up
+    pitchBend = map(pitchBend,modsHi_Thr,1023,8192,(8192 + PB_sens)); // go from 8192 to 16383 (full pb up) when off center threshold going up
   } else if (pitchBend < modsLo_Thr){
-    pitchBend = map(pitchBend,0,modsLo_Thr,0,8192); // go from 8192 to 0 (full pb dn) when off center threshold going down
+    pitchBend = map(pitchBend,0,modsLo_Thr,(8191 - PB_sens),8192); // go from 8192 to 0 (full pb dn) when off center threshold going down
   } else {
     pitchBend = 8192; // 8192 is 0 pitch bend
   }
@@ -299,15 +300,15 @@ void readOctaves(){
   yOctaves = analogRead(A7); // read voltage on analog pin A7
   joyOct = 0;
   if (xOctaves > octsHi_Thr) {
-    joyOct++; // ++ or -- depending on joystick orientation
-  } else if (xOctaves < octsLo_Thr) {
     joyOct--; // ++ or -- depending on joystick orientation
+  } else if (xOctaves < octsLo_Thr) {
+    joyOct++; // ++ or -- depending on joystick orientation
   }
 
   if (yOctaves > octsHi_Thr) {
-    joyOct++; // ++ or -- depending on joystick orientation
-  } else if (yOctaves < octsLo_Thr) {
     joyOct--; // ++ or -- depending on joystick orientation
+  } else if (yOctaves < octsLo_Thr) {
+    joyOct++; // ++ or -- depending on joystick orientation
   }
   //calculate midi note number from octave shifts
   fingeredNote=fingeredNote+joyOct*12;

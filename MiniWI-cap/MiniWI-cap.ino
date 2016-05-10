@@ -54,6 +54,8 @@ HARDWARE NOTES:
 *     
 * Adafruit MPR121 board connected to Arduino I2C ports (A4-SDA and A5-SCL on the Pro Mini)
 * 
+* Midi panic on pin 11 and 12 (internal pullup, both pins low sends all notes off)
+* 
 */
 
 //_______________________________________________________________________________________________ DECLARATIONS
@@ -146,6 +148,10 @@ void setup() {
   
   pinMode(LedPin,OUTPUT);   // declare the LED's pin as output
 
+  // joystick buttons for midi panic
+  pinMode(11,INPUT_PULLUP); // panic pin 1/2
+  pinMode(12,INPUT_PULLUP); // panic pin 2/2
+
   // Set up touch sensor
   if (!touchSensor.begin(0x5A)) {
     while (1);  // Touch sensor initialization failed - stop doing stuff
@@ -164,6 +170,11 @@ void setup() {
 //_______________________________________________________________________________________________ MAIN LOOP
 
 void loop() {
+
+  // if both joystick buttons are pressed, send all notes off
+  if ((digitalRead(11) == 0) && (digitalRead(12) == 0)){
+    midiPanic();
+  }
   
   pressureSensor = analogRead(A3); // Get the pressure sensor reading from analog pin A3
 
@@ -227,6 +238,7 @@ void loop() {
         // the new note.
         midiSend((0x80 | MIDIchannel), activeNote, velocity); // send Note Off message
         activeNote=fingeredNote;
+        velocity = map(constrain(pressureSensor,ON_Thr,breath_max),ON_Thr,breath_max,7,127); // set new velocity value based on current pressure sensor level
         midiSend((0x90 | MIDIchannel), activeNote, velocity); // send Note On message
       }
     }
@@ -242,6 +254,14 @@ void loop() {
   Serial.write(data1);
   Serial.write(data2);
   digitalWrite(LedPin,LOW);  // indicate we're sending MIDI data
+}
+
+//**************************************************************
+
+void midiPanic(){
+  for (int i = 0; i < 128; i++){
+    midiSend((0x80 | MIDIchannel), i, 0);
+  }
 }
 
 //**************************************************************

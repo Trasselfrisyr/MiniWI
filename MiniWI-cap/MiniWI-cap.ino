@@ -320,15 +320,15 @@ void readOctaves(){
   yOctaves = analogRead(A7); // read voltage on analog pin A7
   joyOct = 0;
   if (xOctaves > octsHi_Thr) {
-    joyOct--; // ++ or -- depending on joystick orientation
-  } else if (xOctaves < octsLo_Thr) {
     joyOct++; // ++ or -- depending on joystick orientation
+  } else if (xOctaves < octsLo_Thr) {
+    joyOct--; // ++ or -- depending on joystick orientation
   }
 
   if (yOctaves > octsHi_Thr) {
-    joyOct--; // ++ or -- depending on joystick orientation
-  } else if (yOctaves < octsLo_Thr) {
     joyOct++; // ++ or -- depending on joystick orientation
+  } else if (yOctaves < octsLo_Thr) {
+    joyOct--; // ++ or -- depending on joystick orientation
   }
   //calculate midi note number from octave shifts
   fingeredNote=fingeredNote+joyOct*12;

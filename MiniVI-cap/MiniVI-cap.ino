@@ -61,8 +61,10 @@ HARDWARE NOTES:
 #define breath_max 300  // Blowing as hard as you can
 #define modsLo_Thr 411  // Low threshold for mod stick center
 #define modsHi_Thr 611  // High threshold for mod stick center
-#define octsLo_Thr 311  // Low threshold for octave stick center
-#define octsHi_Thr 711  // High threshold for octave stick center
+#define octsLo_Thr 409  // Low threshold for octave select pot
+#define octsHi_Thr 613  // High threshold for octave select pot
+#define octsLo2_Thr 205  // Low threshold 2 for octave select pot
+#define octsHi2_Thr 818  // High threshold 2 for octave select pot
 #define PB_sens 4095    // Pitch Bend sensitivity 0 to 8191 where 8191 is full pb range
 
 // The three states of our state machine
@@ -329,16 +331,22 @@ void breath(){
 //***********************************************************
 
 void readOctaves(){
-  // Read octave joystick directions combining x and y to a span of 5 octaves (-2 to +2) where 0 is center position
-  int xOctaves;
-  xOctaves = analogRead(A6); // read voltage on analog pin A6
+  // Read octave select pot to shift octave -2 to +2
+  int octaveReading;
+  octaveReading = analogRead(A6); // read voltage on analog pin A6
   potOct = 0;
-  if (xOctaves > octsHi_Thr) {
-    potOct--; // ++ or -- depending on joystick orientation
-  } else if (xOctaves < octsLo_Thr) {
-    potOct++; // ++ or -- depending on joystick orientation
+  if (octaveReading > octsHi_Thr) {
+    potOct++; 
   }
-
+  if (octaveReading < octsLo_Thr) {
+    potOct--; 
+  }
+  if (octaveReading > octsHi2_Thr) {
+    potOct++; 
+  }
+  if (octaveReading < octsLo2_Thr) {
+    potOct--;
+  }
   //calculate midi note number from octave shift
   fingeredNote=fingeredNote+potOct*12;
 }

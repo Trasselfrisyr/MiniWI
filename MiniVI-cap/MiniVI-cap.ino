@@ -25,7 +25,7 @@ HARDWARE NOTES:
 * It is connected to Arduino pin A6.  
 * 
 * A potentiometer controls portamento speed setting.
-* It is connected to Arduino pin A7.  
+* It is connected to Arduino pin A2.  
 *
 * Right hand thumb joystick controls pitch bend and modulation.
 * Pitch bend and modulation are connected to Arduino pins A0 and A1,
@@ -137,7 +137,7 @@ byte OCTdn;   // Octave switch key (pitch change -12)
 byte PortK;   // Portamento momentary on switch
 byte oldportk;
 
-int potOct; // Octave shifting by potentiometer (pitch change steps of 12) value from -1 to +1, 0 is center pos
+int potOct; // Octave shifting by potentiometer (pitch change steps of 12) value from -2 to +2, 0 is center pos
 
 //_______________________________________________________________________________________________ SETUP
 
@@ -214,7 +214,7 @@ void loop() {
     } else {
       // Is it time to send more CC data?
       if (millis() - ccSendTime > CC_INTERVAL) {
-         // deal with Breath, Pitch Bend and Modulation
+         // deal with Breath, Pitch Bend, Modulation and Portamento
          breath();
          pitch_bend();
          modulation();
@@ -304,10 +304,10 @@ void modulation(){
 //***********************************************************
 
 void portamento(){
-  portLevel = map(analogRead(A7),0,1023,0,127); // read voltage on analog pin A7 and map to midi value
+  portLevel = map(analogRead(A2),0,1023,0,127); // read voltage on analog pin A7 and map to midi value
   if (portLevel != oldport){  // only send midi data if level has changed from previous value
     midiSend((0xB0 | MIDIchannel), 5, portLevel);   
-    oldmod=modLevel;
+    oldport=portLevel;
   }
   if (PortK != oldportk){  // only send midi data if status has changed from previous value
     if (PortK){ 

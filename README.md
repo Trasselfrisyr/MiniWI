@@ -23,3 +23,18 @@ Or you can make your own patches optimized for breath control. Pointers for doin
 Questions and suggestions are welcome. Just send them to johan@helgo.net.
 
 -Johan Berglund
+
+
+2016-05-17
+
+Variations:
+
+MiniWI.ino is the original proof of concept breadboard version with regular switches.
+
+MiniWI-lite.ino is a simplified version (no joysticks) for my guest post on the Gordophone blog.
+
+MiniWI-cap.ino is the capacitive touch version implemented in my first playable prototype.
+
+MiniWI-cap-pmt.ino is a modification of the touch version to feature portamento (glide) control and a separate potentiometer for setting base octave instead of using sideways motion of joystick to increase range. This reduces instantly playable range but increases the total range of the controller.
+
+MiniVI-cap.ino is a not yet realized EVI version (Electronic Valve Instrument) based on the Akai EVI1000 and the Steiner MIDI EVI.

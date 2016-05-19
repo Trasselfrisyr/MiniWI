@@ -151,7 +151,7 @@ byte OCTup=0; // Octave switch key (pitch change +12) --- Not used in this versi
 byte OCTdn=0; // Octave switch key (pitch change -12) --- Not used in this version
 
 byte PortK;   // Portamento momentary on switch
-byte oldportk=2;
+byte oldportk;
 
 int joyOct; // Octave shifting by joystick (pitch change steps of 12) value from -2 to +2, 0 is center pos
 
@@ -209,6 +209,7 @@ void loop() {
         // Yes, so calculate MIDI note and velocity, then send a note on event
         readSwitches();
         readOctaves();
+        oldportk=2; // Set oldportk to a value other than 1 or 0 to make sure it always sends the data for new notes
         portamento();
         // We should be at tonguing peak, so set velocity based on current pressureSensor value        
         // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 7 to 127

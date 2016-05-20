@@ -24,6 +24,15 @@ HARDWARE NOTES:
 * A potentiometer controls base octave setting up or down one octave from start note.
 * It is connected to Arduino pin A6.  
 * 
+* Left hand thumb joystick controls octaves.
+* Up/down axis is connected to Arduino pin A7.
+* 
+*       +1  
+*       ^
+*     < o >
+*       v
+*      -1
+* 
 * A potentiometer controls portamento speed setting.
 * It is connected to Arduino pin A2.  
 *
@@ -50,7 +59,7 @@ HARDWARE NOTES:
 *     
 * Adafruit MPR121 board connected to Arduino I2C ports (A4-SDA and A5-SCL on the Pro Mini)
 * 
-* Midi panic on pin 11 (internal pullup, pin low sends all notes off)
+* Midi panic on pin 11 and 12 (internal pullup, both pins low sends all notes off)
 * 
 */
 
@@ -61,8 +70,10 @@ HARDWARE NOTES:
 #define breath_max 300  // Blowing as hard as you can
 #define modsLo_Thr 411  // Low threshold for mod stick center
 #define modsHi_Thr 611  // High threshold for mod stick center
-#define octsLo_Thr 409  // Low threshold for octave select pot
-#define octsHi_Thr 613  // High threshold for octave select pot
+#define octsLo_Thr 311  // Low threshold for octave stick center
+#define octsHi_Thr 711  // High threshold for octave stick center
+#define octsLo1_Thr 409  // Low threshold for octave select pot
+#define octsHi1_Thr 613  // High threshold for octave select pot
 #define octsLo2_Thr 205  // Low threshold 2 for octave select pot
 #define octsHi2_Thr 818  // High threshold 2 for octave select pot
 #define PB_sens 4095    // Pitch Bend sensitivity 0 to 8191 where 8191 is full pb range
@@ -105,7 +116,7 @@ int pitchBend;
 int oldpb=8192;
 
 int portLevel;
-int oldport=0;
+int oldport=-1;
 
 int breathLevel=0;   // breath level (smoothed) not mapped to CC value
 
@@ -169,8 +180,8 @@ void setup() {
 
 void loop() {
 
-  // if joystick button is pressed, send all notes off
-  if (digitalRead(11) == 0){
+  // if both joystick buttons are pressed, send all notes off
+  if ((digitalRead(11) == 0) && (digitalRead(12) == 0)){
     midiPanic();
   }
   
@@ -192,6 +203,8 @@ void loop() {
         // Yes, so calculate MIDI note and velocity, then send a note on event
         readSwitches();
         readOctaves();
+        oldportk=2; // Set oldportk to a value other than 1 or 0 to make sure it always sends the data for new notes
+        portamento();
         // We should be at tonguing peak, so set velocity based on current pressureSensor value        
         // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 7 to 127
         velocity = map(constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max),ON_Thr,breath_max,7,127);
@@ -218,7 +231,6 @@ void loop() {
          breath();
          pitch_bend();
          modulation();
-         portamento();
          ccSendTime = millis();
       }
     }
@@ -235,10 +247,11 @@ void loop() {
         // Player has moved to a new fingering while still blowing.
         // Send a note off for the current note and a note on for
         // the new note.
-        midiSend((0x80 | MIDIchannel), activeNote, velocity); // send Note Off message
-        activeNote=fingeredNote;
+        portamento();  
         velocity = map(constrain(pressureSensor,ON_Thr,breath_max),ON_Thr,breath_max,7,127); // set new velocity value based on current pressure sensor level
-        midiSend((0x90 | MIDIchannel), activeNote, velocity); // send Note On message
+        midiSend((0x90 | MIDIchannel), fingeredNote, velocity); // send Note On message for new note
+        midiSend((0x80 | MIDIchannel), activeNote, 0); // send Note Off message for previous note (legato)
+        activeNote=fingeredNote;
       }
     }
   }
@@ -333,18 +346,26 @@ void breath(){
 void readOctaves(){
   // Read octave select pot to shift octave -2 to +2
   int octaveReading;
+  int joyOctaveR;
   octaveReading = analogRead(A6); // read voltage on analog pin A6
+  joyOctaveR = analogRead(A7); // read voltage on analog pin A7
   potOct = 0;
-  if (octaveReading > octsHi_Thr) {
+  if (octaveReading > octsHi1_Thr) {
     potOct++; 
   }
-  if (octaveReading < octsLo_Thr) {
+  if (octaveReading < octsLo1_Thr) {
     potOct--; 
   }
   if (octaveReading > octsHi2_Thr) {
     potOct++; 
   }
   if (octaveReading < octsLo2_Thr) {
+    potOct--;
+  }
+  if (joyOctaveR > octsHi_Thr) {
+    potOct++;
+  }
+  if (joyOctaveR < octsLo_Thr) {
     potOct--;
   }
   //calculate midi note number from octave shift
@@ -362,9 +383,9 @@ void readSwitches(){
   K5=((touchValue >> 4) & 0x01);
   K6=((touchValue >> 5) & 0x01);
   K7=((touchValue >> 6) & 0x01);
-  OCTup=((touchValue >> 7) & 0x01);
-  OCTdn=((touchValue >> 8) & 0x01);
-  PortK=((touchValue >> 9) & 0x01);
+  OCTup=((touchValue >> 7) & 0x01); // keep this?
+  OCTdn=((touchValue >> 8) & 0x01); // keep this?
+  PortK=((touchValue >> 9) & 0x01); // portamento key
   //calculate midi note number from pressed keys
   fingeredNote=startNote-2*K1-K2-3*K3-5*K4+2*K5+K6+4*K7+12*OCTup-12*OCTdn;
 }

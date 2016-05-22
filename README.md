@@ -13,6 +13,8 @@ http://gordophone.blogspot.se/2013/01/a-series-basics-of-diy-wind-controllers.ht
 
 Hardware notes for connection of MIDI, pressure sensor, keys and joysticks are available in the MiniWI.ino file.
 
+The MIDI routines and the MIDI connections are pretty standard, but I first found them on the midikits.net website, so I'll give Tom Scarff a mention here. Kept his nice MIDI pinout ASCII sketch thing and some comment style too. 
+
 The controller is made to work well with synthesizers using wind controller patches from Patchman Music, with the breath data sent by CC #2 (Breath). For testing I’ve been using their wind controller soundbank for Roland JV-1010.
 
 http://www.patchmanmusic.com
@@ -38,3 +40,9 @@ MiniWI-cap.ino is the capacitive touch version implemented in my first playable 
 MiniWI-cap-pmt.ino is a modification of the touch version to feature portamento (glide) control and a separate potentiometer for setting base octave instead of using sideways motion of joystick to increase range. This reduces instantly playable range but increases the total range of the controller.
 
 MiniVI-cap.ino is a not yet realized EVI version (Electronic Valve Instrument) based on the Akai EVI1000 and the Steiner MIDI EVI.
+
+2016-05-22
+
+I’ve added some pictures from my Instagram account. Check it out for more pictures from this and my other projects.
+
+https://www.instagram.com/trasselfrisyr/

@@ -22,7 +22,7 @@ HARDWARE NOTES:
 *    all other pins - unconnected                         \___2___/
 *
 * Left hand thumb joystick controls octaves.
-* Up/down axis is connected to Arduino pins A6.
+* Up/down axis is connected to Arduino pin A6.
 * 
 *       +1  
 *       ^
@@ -153,7 +153,7 @@ byte OCTdn=0; // Octave switch key (pitch change -12) --- Not used in this versi
 byte PortK;   // Portamento momentary on switch
 byte oldportk;
 
-int joyOct; // Octave shifting by joystick (pitch change steps of 12) value from -2 to +2, 0 is center pos
+int joyOct; // Octave shifting by joystick or potentiometer
 
 //_______________________________________________________________________________________________ SETUP
 
@@ -350,17 +350,19 @@ void breath(){
 //***********************************************************
 
 void readOctaves(){
-  // Read octave joystick directions combining x and y to a span of 5 octaves (-2 to +2) where 0 is center position
+  // Read octave joystick and set octave of the fingered note (run after readSwitches)
   int xOctaves;
   int yOctaves;
   xOctaves = analogRead(A6); // read voltage on analog pin A6
   yOctaves = analogRead(A7); // read voltage on analog pin A7 (this is now a separate potentiometer, not joystick axis)
   joyOct = 0;
+  // xOctaves is up/down and the only used octave joystick direction in this version
   if (xOctaves > octsHi_Thr) {
     joyOct++;
   } else if (xOctaves < octsLo_Thr) {
     joyOct--;
   }
+  // yOctaves in this version is a separate potentiometer setting base octave -2 to +2
   if (yOctaves > octsHi1_Thr) {
     joyOct++; // ++ or -- depending on joystick orientation
   } else if (yOctaves < octsLo1_Thr) {

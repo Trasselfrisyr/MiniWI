@@ -46,3 +46,11 @@ MiniVI-cap.ino is a not yet realized EVI version (Electronic Valve Instrument) b
 I’ve added some pictures from my Instagram account. Check it out for more pictures from this and my other projects.
 
 https://www.instagram.com/trasselfrisyr/
+
+2016-05-30
+
+Project profile for the MiniWI added on Hackaday.io
+
+https://hackaday.io/project/11843-miniwi-woodwind-midi-controller
+
+

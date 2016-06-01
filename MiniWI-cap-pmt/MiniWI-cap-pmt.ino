@@ -5,11 +5,12 @@
 NAME:                 MiniWI Cap Touch and Portamento ver.
 WRITTEN BY:           JOHAN BERGLUND
 CREDITS:              State machine from the Gordophone blog by GORDON GOOD
-DATE:                 2016-04-17
+DATE:                 2016-06-01
 FILE SAVED AS:        MiniWI-cap-pmt.ino
 FOR:                  Arduino Pro Mini, ATmega328, version with breakouts for A6 and A7
 CLOCK:                16.00 MHz CRYSTAL                                        
-PROGRAMME FUNCTION:   Wind Controller with EWI style key setup (reduced), Freescale MPX5010GP breath sensor, PS2 style thumb joysticks 
+PROGRAMME FUNCTION:   Wind Controller with EWI style key setup (reduced) with optional Casio DH addition, 
+                      Freescale MPX5010GP breath sensor, PS2 style thumb joysticks 
                       for octave selection and pb/mod control, capacitive touch keys, output to 5-pin DIN MIDI 
 
 HARDWARE NOTES:
@@ -77,6 +78,7 @@ HARDWARE NOTES:
 #define octsLo2_Thr 205  // Low threshold 2 for octave select pot
 #define octsHi2_Thr 818  // High threshold 2 for octave select pot
 #define PB_sens 4095    // Pitch Bend sensitivity 0 to 8191 where 8191 is full pb range
+#define casioMod 1      // Enable Casio DH 2nd octave fingering (LH1 lifted)
 
 // The three states of our state machine
 
@@ -134,8 +136,10 @@ byte LedPin = 13;    // select the pin for the LED
 Adafruit_MPR121 touchSensor = Adafruit_MPR121(); // This is the 12-input touch sensor
 
             // Key variables, TRUE (1) for pressed, FALSE (0) for not pressed
-byte LH1;   // Left Hand key 1 (pitch change -2)
+byte LH1;   // Left Hand key 1 (pitch change -2) 
+            // Casio mod addition: If LH1 is not touched when LH2 and LH3 are, pitch change +9
 byte LHb;   // Left Hand bis key (pitch change -1 unless both LH1 and LH2 are pressed)
+            // Casio modification: pitch change -1 unless LH2 is pressed
 byte LH2;   // Left Hand key 2  (with LH1 also pressed pitch change is -2, otherwise -1)
 byte LH3;   // Left Hand key 3 (pitch change -2)
 byte LHp1;  // Left Hand pinky key 1 (pitch change +1)
@@ -393,5 +397,9 @@ void readSwitches(){
   RHp3=((touchValue >> 10) & 0x01);
   PortK=((touchValue >> 5) & 0x01); // portamento key
   //calculate midi note number from pressed keys
-  fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup-12*OCTdn;
+  if (casioMod){
+    fingeredNote=startNote-2*LH1-(LHb && !LH2)-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup-12*OCTdn+9*(!LH1 && LH2 && LH3);
+  } else {
+    fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup-12*OCTdn;
+  }
 }

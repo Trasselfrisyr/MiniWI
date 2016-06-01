@@ -53,4 +53,7 @@ Project profile for the MiniWI added on Hackaday.io
 
 https://hackaday.io/project/11843-miniwi-woodwind-midi-controller
 
+2016-06-01
+
+Added optional Casio DH 2nd octave fingerings. Default enabled. Set #define casioMod 0 to disable.
 

@@ -78,7 +78,7 @@ HARDWARE NOTES:
 #define octsLo2_Thr 205  // Low threshold 2 for octave select pot
 #define octsHi2_Thr 818  // High threshold 2 for octave select pot
 #define PB_sens 4095    // Pitch Bend sensitivity 0 to 8191 where 8191 is full pb range
-#define casioMod 1      // Enable Casio DH 2nd octave fingering (LH1 lifted)
+#define casioMod 0      // Default selection on/off for Casio DH 2nd octave fingering (LH1 lifted)
 
 // The three states of our state machine
 
@@ -99,6 +99,8 @@ HARDWARE NOTES:
 
 
 //variables setup
+
+byte casiomodSelect;               // Change the fingering setting w octave stick up at power on
 
 int state;                         // The state of the state machine
 unsigned long ccSendTime = 0L;     // The last time we sent CC values
@@ -174,6 +176,12 @@ void setup() {
   // Set up touch sensor
   if (!touchSensor.begin(0x5A)) {
     while (1);  // Touch sensor initialization failed - stop doing stuff
+  }
+  // Set the selection for Casio fingering - Pitch stick up at power on changes from default
+  if (analogRead(A6) > octsHi_Thr) {
+    casiomodSelect=!casioMod;
+  } else{
+    casiomodSelect=casioMod;
   }
   for (x=1; x<=4; x++){  // Do the flashy-flashy to say we are up and running
     digitalWrite( LedPin, HIGH );
@@ -397,7 +405,7 @@ void readSwitches(){
   RHp3=((touchValue >> 10) & 0x01);
   PortK=((touchValue >> 5) & 0x01); // portamento key
   //calculate midi note number from pressed keys
-  if (casioMod){
+  if (casiomodSelect){
     fingeredNote=startNote-2*LH1-(LHb && !LH2)-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup-12*OCTdn+9*(!LH1 && LH2 && LH3);
   } else {
     fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup-12*OCTdn;

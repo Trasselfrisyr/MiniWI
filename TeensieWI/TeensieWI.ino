@@ -86,7 +86,7 @@ byte startNote=73;   // set startNote to C# (change this value in steps of 12 to
 
             // Key variables, TRUE (1) for pressed, FALSE (0) for not pressed
 byte LH1;   // Left Hand key 1 (pitch change -2) 
-            // Casio extra notes addition: If LH1 is not touched when LH2 and LH3 are, pitch change +9
+            // Casio style 2nd octave: If LH1 is not touched when LH2 and LH3 are, pitch change +9
 byte LH2;   // Left Hand key 2  (with LH1 also pressed pitch change is -2, otherwise -1)
 byte LH3;   // Left Hand key 3 (pitch change -2)
 byte LHp1;  // Left Hand pinky key 1 (pitch change +1)

@@ -57,3 +57,6 @@ https://hackaday.io/project/11843-miniwi-woodwind-midi-controller
 
 Added optional Casio DH 2nd octave fingerings. Default disabled. Set #define casioMod 1 to set default enabled. Hold octave stick up at power on for manual selection of the setting that is not default.
 
+2016-06-12
+
+Added tested and working version of the new TeensieWI, a simplified version for USB MIDI using the built in capacitive touch sensing in the Teensy LC and breath sensing from the MPX5010GP. Small warning here: the breath sensor output is not limited and could reach values near 5V, while the analog input on the Teensy LC is 3.3V and not rated 5V safe. To reach these levels you’d have to blow really, really hard. If you need to feel safe, go with a Teensy 3.1, 3.2 or 3.3 as they have 5V tolerant inputs. Only minor alterations needed in the code for use with Teensy 3.x. 

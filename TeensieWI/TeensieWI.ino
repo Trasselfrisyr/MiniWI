@@ -28,9 +28,9 @@ HARDWARE NOTES:
 
 //_______________________________________________________________________________________________ DECLARATIONS
 
-#define ON_Thr 100       // Set threshold level before switching ON
+#define ON_Thr 70       // Set threshold level before switching ON
 #define ON_Delay   20   // Set Delay after ON threshold before velocity is checked (wait for tounging peak)
-#define breath_max 1000  // Threshold for maximum breath
+#define breath_max 550  // Threshold for maximum breath
 
 // The three states of our state machine
 
@@ -180,12 +180,12 @@ void readSwitches(){
   LH1=touchRead(17)>1500;
   LH2=touchRead(4)>1500;
   LH3=touchRead(3)>1500;
-  LHp1=touchRead(18)>1500;
+  LHp1=touchRead(18)>1200;
   RH1=touchRead(19)>1500;
   RH2=touchRead(22)>1500;
   RH3=touchRead(23)>1500;
-  RHp2=touchRead(1)>1500;
-  RHp3=touchRead(0)>1500;
+  RHp2=touchRead(1)>1200;
+  RHp3=touchRead(0)>1200;
   OCTup=touchRead(15)>1500;
   OCTup=touchRead(16)>1500;
   //calculate midi note number from pressed keys  

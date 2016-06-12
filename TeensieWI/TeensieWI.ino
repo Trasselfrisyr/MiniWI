@@ -12,17 +12,6 @@ PROGRAMME FUNCTION:   Simple Wind Controller using the Freescale MPX5010GP breat
 HARDWARE NOTES:
     
 * The Freescale MPX5010GP pressure sensor output (V OUT) is connected to pin 21(A7).
-* Voltage is reduced to 3.3V level through a voltage divider.
-* 
-*                       +––––– V OUT
-*                       | 
-*                  1K  [ ]
-*                       | 
-* Teensy input pin –––––+
-*                       | 
-*                  2K  [ ]
-*                       | 
-*              GND –––––+––––– GND
 * 
 * Sensor pinout
 * 1: V OUT (pin with indent)

@@ -12,6 +12,7 @@ PROGRAMME FUNCTION:   Simple Wind Controller using the Freescale MPX5010GP breat
 HARDWARE NOTES:
     
 * The Freescale MPX5010GP pressure sensor output (V OUT) is connected to pin 21(A7).
+* (Warning: no voltage limiting before input, can harm Teensy if excessive pressure is applied.)
 * 
 * Sensor pinout
 * 1: V OUT (pin with indent)
@@ -83,7 +84,7 @@ byte RH1;   // Right Hand key 1 (with LH3 also pressed pitch change is -2, other
 byte RH2;   // Right Hand key 2 (pitch change -1)
 byte RH3;   // Right Hand key 3 (pitch change -2)
 byte RHp2;  // Right Hand pinky key 2 (pitch change -1)
-byte RHp3;  // Right Hand pinky key 3 (pitch change -2)
+byte RHp3;  // Right Hand pinky key 3 (pitch change -2, in this version -1 if RHp2 is pressed)
 byte OCTup; // Octave switch key (pitch change +12) 
 byte OCTdn; // Octave switch key (pitch change -12) 
 

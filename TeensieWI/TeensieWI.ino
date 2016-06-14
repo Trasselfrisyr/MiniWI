@@ -188,7 +188,7 @@ void readSwitches(){
   RHp2=touchRead(1)>1200;
   RHp3=touchRead(0)>1200;
   OCTup=touchRead(15)>1500;
-  OCTup=touchRead(16)>1500;
+  OCTdn=touchRead(16)>1500;
   //calculate midi note number from pressed keys  
   fingeredNote=startNote-2*LH1-LH2-(LH2 && LH1)-2*LH3+LHp1-RH1-(RH1 && LH3)-RH2-2*RH3-RHp2-2*RHp3+(RHp2 && RHp3)+12*OCTup-12*OCTdn+9*(!LH1 && LH2 && LH3);
 }

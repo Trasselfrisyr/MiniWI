@@ -186,27 +186,27 @@ void loop() {
          // deal with Breath
          breath();
          ccSendTime = millis();
+      }    
+      readSwitches();     
+      //calculate midi note number from pressed keys
+      fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup;
+  
+      if (fingeredNote != lastFingering){ //
+        // reset the debouncing timer
+        lastDebounceTime = millis();
       }
-    }
-    readSwitches();     
-    //calculate midi note number from pressed keys
-    fingeredNote=startNote-2*LH1-(LHb && !(LH1 && LH2))-LH2-(LH2 && LH1)-2*LH3+LHp1-LHp2+(RHs && !LHp1)-RH1-(RH1 && LH3)-RH2-2*RH3+RHp1-RHp2-2*RHp3+12*OCTup;
-
-    if (fingeredNote != lastFingering){ //
-      // reset the debouncing timer
-      lastDebounceTime = millis();
-    }
-    if ((millis() - lastDebounceTime) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer
-    // than the debounce delay, so take it as the actual current state
-      if (fingeredNote != activeNote) {
-        // Player has moved to a new fingering while still blowing.
-        // Send a note off for the current note and a note on for
-        // the new note.
-        midiSend((0x80 | MIDIchannel), activeNote, velocity); // send Note Off message
-        activeNote=fingeredNote;
-        velocity = map(constrain(pressureSensor,ON_Thr,breath_max),ON_Thr,breath_max,7,127); // set new velocity value based on current pressure sensor level
-        midiSend((0x90 | MIDIchannel), activeNote, velocity); // send Note On message
+      if ((millis() - lastDebounceTime) > debounceDelay) {
+      // whatever the reading is at, it's been there for longer
+      // than the debounce delay, so take it as the actual current state
+        if (fingeredNote != activeNote) {
+          // Player has moved to a new fingering while still blowing.
+          // Send a note off for the current note and a note on for
+          // the new note.
+          midiSend((0x80 | MIDIchannel), activeNote, velocity); // send Note Off message
+          activeNote=fingeredNote;
+          velocity = map(constrain(pressureSensor,ON_Thr,breath_max),ON_Thr,breath_max,7,127); // set new velocity value based on current pressure sensor level
+          midiSend((0x90 | MIDIchannel), activeNote, velocity); // send Note On message
+        }
       }
     }
   }

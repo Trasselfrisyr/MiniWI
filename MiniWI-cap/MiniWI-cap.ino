@@ -221,25 +221,25 @@ void loop() {
          pitch_bend();
          modulation();
          ccSendTime = millis();
+      }    
+      readSwitches();
+      readOctaves();
+      if (fingeredNote != lastFingering){ //
+        // reset the debouncing timer
+        lastDebounceTime = millis();
       }
-    }
-    readSwitches();
-    readOctaves();
-    if (fingeredNote != lastFingering){ //
-      // reset the debouncing timer
-      lastDebounceTime = millis();
-    }
-    if ((millis() - lastDebounceTime) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer
-    // than the debounce delay, so take it as the actual current state
-      if (fingeredNote != activeNote) {
-        // Player has moved to a new fingering while still blowing.
-        // Send a note off for the current note and a note on for
-        // the new note.
-        midiSend((0x80 | MIDIchannel), activeNote, velocity); // send Note Off message
-        activeNote=fingeredNote;
-        velocity = map(constrain(pressureSensor,ON_Thr,breath_max),ON_Thr,breath_max,7,127); // set new velocity value based on current pressure sensor level
-        midiSend((0x90 | MIDIchannel), activeNote, velocity); // send Note On message
+      if ((millis() - lastDebounceTime) > debounceDelay) {
+      // whatever the reading is at, it's been there for longer
+      // than the debounce delay, so take it as the actual current state
+        if (fingeredNote != activeNote) {
+          // Player has moved to a new fingering while still blowing.
+          // Send a note off for the current note and a note on for
+          // the new note.
+          midiSend((0x80 | MIDIchannel), activeNote, velocity); // send Note Off message
+          activeNote=fingeredNote;
+          velocity = map(constrain(pressureSensor,ON_Thr,breath_max),ON_Thr,breath_max,7,127); // set new velocity value based on current pressure sensor level
+          midiSend((0x90 | MIDIchannel), activeNote, velocity); // send Note On message
+        }
       }
     }
   }

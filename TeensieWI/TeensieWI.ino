@@ -143,25 +143,26 @@ void loop() {
          breath();
          ccSendTime = millis();
       }
-    }
-    readSwitches();
-    if (fingeredNote != lastFingering){ //
-      // reset the debouncing timer
-      lastDebounceTime = millis();
-    }
-    if ((millis() - lastDebounceTime) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer
-    // than the debounce delay, so take it as the actual current state
-      if (fingeredNote != activeNote) {
-        // Player has moved to a new fingering while still blowing.
-        // Send a note off for the current note and a note on for
-        // the new note.      
-        velocity = map(constrain(pressureSensor,ON_Thr,breath_max),ON_Thr,breath_max,7,127); // set new velocity value based on current pressure sensor level
-        usbMIDI.sendNoteOn(fingeredNote, velocity, MIDIchannel); // send Note On message for new note
-        usbMIDI.sendNoteOff(activeNote, 0, MIDIchannel); // send Note Off message for previous note (legato)
-        activeNote=fingeredNote;
+
+      readSwitches();
+      if (fingeredNote != lastFingering){ //
+        // reset the debouncing timer
+        lastDebounceTime = millis();
       }
-    }
+      if ((millis() - lastDebounceTime) > debounceDelay) {
+      // whatever the reading is at, it's been there for longer
+      // than the debounce delay, so take it as the actual current state
+        if (fingeredNote != activeNote) {
+          // Player has moved to a new fingering while still blowing.
+          // Send a note off for the current note and a note on for
+          // the new note.      
+          velocity = map(constrain(pressureSensor,ON_Thr,breath_max),ON_Thr,breath_max,7,127); // set new velocity value based on current pressure sensor level
+          usbMIDI.sendNoteOn(fingeredNote, velocity, MIDIchannel); // send Note On message for new note         
+          usbMIDI.sendNoteOff(activeNote, 0, MIDIchannel); // send Note Off message for previous note (legato)
+          activeNote=fingeredNote;
+        }
+      }
+     }
   }
   lastFingering=fingeredNote; 
 }
@@ -181,14 +182,15 @@ void readSwitches(){
   LH1=touchRead(17)>1500;
   LH2=touchRead(4)>1500;
   LH3=touchRead(3)>1500;
-  LHp1=touchRead(18)>1200;
+  LHp1=touchRead(18)>1000;
   RH1=touchRead(19)>1500;
   RH2=touchRead(22)>1500;
   RH3=touchRead(23)>1500;
-  RHp2=touchRead(1)>1200;
-  RHp3=touchRead(0)>1200;
-  OCTup=touchRead(15)>1500;
-  OCTdn=touchRead(16)>1500;
+  RHp2=touchRead(1)>1000;
+  RHp3=touchRead(0)>1000;
+  OCTup=touchRead(15)>1800;
+  OCTdn=touchRead(16)>1800;
   //calculate midi note number from pressed keys  
   fingeredNote=startNote-2*LH1-LH2-(LH2 && LH1)-2*LH3+LHp1-RH1-(RH1 && LH3)-RH2-2*RH3-RHp2-2*RHp3+(RHp2 && RHp3)+12*OCTup-12*OCTdn+9*(!LH1 && LH2 && LH3);
 }
+

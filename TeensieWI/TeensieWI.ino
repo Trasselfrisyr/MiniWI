@@ -48,7 +48,7 @@ HARDWARE NOTES:
 
 // Send CC data no more than every CC_INTERVAL
 // milliseconds
-#define CC_INTERVAL 20 
+#define CC_INTERVAL 10 
 
 
 //variables setup
@@ -59,7 +59,7 @@ unsigned long breath_on_time = 0L; // Time when breath sensor value went over th
 int initial_breath_value;          // The breath value at the time we observed the transition
 
 unsigned long lastDebounceTime = 0;         // The last time the fingering was changed
-unsigned long debounceDelay = 30;           // The debounce time; increase if the output flickers
+unsigned long debounceDelay = 10;           // The debounce time; increase if the output flickers
 int lastFingering = 0;             // Keep the last fingering value for debouncing
 
 byte MIDIchannel=1;                // MIDI channel 1
@@ -118,9 +118,10 @@ void loop() {
         // Yes, so calculate MIDI note and velocity, then send a note on event
         readSwitches();
         // We should be at tonguing peak, so set velocity based on current pressureSensor value        
-        // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 7 to 127
-        velocity = map(constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max),ON_Thr,breath_max,7,127);
+        // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 1 to 127
+        velocity = map(constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max),ON_Thr,breath_max,1,127);
         breathLevel=constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max);
+        breath(); // send breath data
         usbMIDI.sendNoteOn(fingeredNote, velocity, MIDIchannel); // send Note On message for new note 
         activeNote=fingeredNote;
         state = NOTE_ON;
@@ -170,7 +171,7 @@ void loop() {
 
 void breath(){
   int breathCC;
-  breathLevel = breathLevel*0.8+pressureSensor*0.2; // smoothing of breathLevel value
+  breathLevel = breathLevel*0.5+pressureSensor*0.5; // smoothing of breathLevel value
   breathCC = map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,127);
   usbMIDI.sendControlChange(2, breathCC, MIDIchannel);
 }

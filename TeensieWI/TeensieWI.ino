@@ -48,7 +48,7 @@ HARDWARE NOTES:
 
 // Send CC data no more than every CC_INTERVAL
 // milliseconds
-#define CC_INTERVAL 10 
+#define CC_INTERVAL 20 
 
 
 //variables setup
@@ -59,7 +59,7 @@ unsigned long breath_on_time = 0L; // Time when breath sensor value went over th
 int initial_breath_value;          // The breath value at the time we observed the transition
 
 unsigned long lastDebounceTime = 0;         // The last time the fingering was changed
-unsigned long debounceDelay = 10;           // The debounce time; increase if the output flickers
+unsigned long debounceDelay = 20;           // The debounce time; increase if the output flickers
 int lastFingering = 0;             // Keep the last fingering value for debouncing
 
 byte MIDIchannel=1;                // MIDI channel 1
@@ -171,7 +171,7 @@ void loop() {
 
 void breath(){
   int breathCC;
-  breathLevel = breathLevel*0.5+pressureSensor*0.5; // smoothing of breathLevel value
+  breathLevel = breathLevel*0.8+pressureSensor*0.2; // smoothing of breathLevel value
   breathCC = map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,127);
   usbMIDI.sendControlChange(2, breathCC, MIDIchannel);
 }
@@ -183,14 +183,14 @@ void readSwitches(){
   LH1=touchRead(17)>1500;
   LH2=touchRead(4)>1500;
   LH3=touchRead(3)>1500;
-  LHp1=touchRead(18)>1000;
+  LHp1=touchRead(18)>1500;
   RH1=touchRead(19)>1500;
   RH2=touchRead(22)>1500;
   RH3=touchRead(23)>1500;
-  RHp2=touchRead(1)>1000;
-  RHp3=touchRead(0)>1000;
-  OCTup=touchRead(15)>1800;
-  OCTdn=touchRead(16)>1800;
+  RHp2=touchRead(1)>1500;
+  RHp3=touchRead(0)>1500;
+  OCTup=touchRead(15)>1500;
+  OCTdn=touchRead(16)>1500;
   //calculate midi note number from pressed keys  
   fingeredNote=startNote-2*LH1-LH2-(LH2 && LH1)-2*LH3+LHp1-RH1-(RH1 && LH3)-RH2-2*RH3-RHp2-2*RHp3+(RHp2 && RHp3)+12*OCTup-12*OCTdn+9*(!LH1 && LH2 && LH3);
 }

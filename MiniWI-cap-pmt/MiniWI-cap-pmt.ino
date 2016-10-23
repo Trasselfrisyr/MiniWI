@@ -227,6 +227,7 @@ void loop() {
         // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 7 to 127
         velocity = map(constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max),ON_Thr,breath_max,7,127);
         breathLevel=constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max);
+        breath();
         midiSend((0x90 | MIDIchannel), fingeredNote, velocity); // send Note On message for new note
         activeNote=fingeredNote;
         state = NOTE_ON;

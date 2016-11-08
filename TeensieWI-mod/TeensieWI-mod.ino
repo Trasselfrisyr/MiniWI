@@ -213,11 +213,11 @@ void breath(){
 void pitch_bend(){
   pitchBend = analogRead(A6); // read voltage on analog pin A0
   if (pitchBend > modsHi_Thr){
-    pitchBend = oldpb*0.8+0.2*map(constrain(pitchBend,modsHi_Thr,modsMax),modsHi_Thr,modsMax,8192,(8192 + PB_sens)); // go from 8192 to 16383 (full pb up) when off center threshold going up
+    pitchBend = oldpb*0.6+0.4*map(constrain(pitchBend,modsHi_Thr,modsMax),modsHi_Thr,modsMax,8192,(8192 + PB_sens)); // go from 8192 to 16383 (full pb up) when off center threshold going up
   } else if (pitchBend < modsLo_Thr){
-    pitchBend = oldpb*0.8+0.2*map(constrain(pitchBend,modsMin,modsLo_Thr),modsMin,modsLo_Thr,(8191 - PB_sens),8192); // go from 8192 to 0 (full pb dn) when off center threshold going down
+    pitchBend = oldpb*0.6+0.4*map(constrain(pitchBend,modsMin,modsLo_Thr),modsMin,modsLo_Thr,(8191 - PB_sens),8192); // go from 8192 to 0 (full pb dn) when off center threshold going down
   } else {
-    pitchBend = oldpb*0.8+8192*0.2; // released, so smooth your way back to zero
+    pitchBend = oldpb*0.6+8192*0.4; // released, so smooth your way back to zero
     if ((pitchBend > 8187) && (pitchBend < 8197)) pitchBend = 8192; // 8192 is 0 pitch bend, don't miss it bc of smoothing
   }
   if (pitchBend != oldpb){// only send midi data if pitch bend has changed from previous value

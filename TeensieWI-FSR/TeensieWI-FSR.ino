@@ -31,16 +31,16 @@ HARDWARE NOTES:
 * 
 * Slide switch connecting pin 11 to GND for switching FSR between modulation and pitch bend down.
 * 
-*/
+*/ 
 
 //_______________________________________________________________________________________________ DECLARATIONS
 
 #define ON_Thr 70       // Set threshold level before switching ON
 #define ON_Delay   20   // Set Delay after ON threshold before velocity is checked (wait for tounging peak)
 #define breath_max 550  // Threshold for maximum breath
-#define FSR_Thr 15
-#define FSR_Max 120
-#define PB_sens 4095    // Pitch Bend sensitivity 0 to 8191 where 8191 is full pb range
+#define FSR_Thr 30
+#define FSR_Max 200
+#define PB_sens 4095    // Pitch Bend sensitivity 0 to 8191 where 8191 is full pb range, 4095 half
 
 // The three states of our state machine
 

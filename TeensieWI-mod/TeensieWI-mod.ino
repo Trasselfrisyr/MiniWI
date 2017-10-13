@@ -48,9 +48,9 @@ HARDWARE NOTES:
 #define breath_max 550  // Threshold for maximum breath
 #define modsLo_Thr 411  // Low threshold for mod stick center
 #define modsHi_Thr 611  // High threshold for mod stick center
-#define modsMin 200     // PSP joystick min value
-#define modsMax 800     // PSP joystick max value
-#define PB_sens 4095    // Pitch Bend sensitivity 0 to 8191 where 8191 is full pb range
+#define modsMin 240     // PSP joystick min value
+#define modsMax 770     // PSP joystick max value
+#define PB_sens 4096    // Pitch Bend sensitivity 0 to 8192 where 8192 is full pb range, 4096 is half range
 
 
 
@@ -69,7 +69,7 @@ HARDWARE NOTES:
 
 // Send CC data no more than every CC_INTERVAL
 // milliseconds
-#define CC_INTERVAL 10 
+#define CC_INTERVAL 5 
 
 
 //variables setup
@@ -121,7 +121,8 @@ byte OCTdn; // Octave switch key (pitch change -12)
 void setup() {
 
   state = NOTE_OFF;  // initialize state machine
-  
+  pinMode(13,OUTPUT);
+  digitalWrite(13,LOW);  
 }
 
 //_______________________________________________________________________________________________ MAIN LOOP
@@ -151,6 +152,7 @@ void loop() {
         breathLevel=constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max);
         breath(); // send breath data
         usbMIDI.sendNoteOn(fingeredNote, velocity, MIDIchannel); // send Note On message for new note 
+        digitalWrite(13,HIGH);
         activeNote=fingeredNote;
         state = NOTE_ON;
       }
@@ -163,6 +165,7 @@ void loop() {
     if (pressureSensor < ON_Thr) {
       // Value has fallen below threshold - turn the note off
       usbMIDI.sendNoteOff(activeNote, velocity, MIDIchannel); //  send Note Off message 
+      digitalWrite(13,LOW);
       breathLevel=0;
       state = NOTE_OFF;
     } else {
@@ -211,11 +214,11 @@ void breath(){
 //**************************************************************
 
 void pitch_bend(){
-  pitchBend = analogRead(A6); // read voltage on analog pin A0
+  pitchBend = analogRead(A0); // read voltage on analog pin A0
   if (pitchBend > modsHi_Thr){
-    pitchBend = oldpb*0.6+0.4*map(constrain(pitchBend,modsHi_Thr,modsMax),modsHi_Thr,modsMax,8192,(8192 + PB_sens)); // go from 8192 to 16383 (full pb up) when off center threshold going up
+    pitchBend = oldpb*0.6+0.4*map(constrain(pitchBend,modsHi_Thr,modsMax),modsHi_Thr,modsMax,8192,(8193 + PB_sens)); // go from 8192 to 16383 (full pb up) when off center threshold going up
   } else if (pitchBend < modsLo_Thr){
-    pitchBend = oldpb*0.6+0.4*map(constrain(pitchBend,modsMin,modsLo_Thr),modsMin,modsLo_Thr,(8191 - PB_sens),8192); // go from 8192 to 0 (full pb dn) when off center threshold going down
+    pitchBend = oldpb*0.6+0.4*map(constrain(pitchBend,modsMin,modsLo_Thr),modsMin,modsLo_Thr,(8192 - PB_sens),8192); // go from 8192 to 0 (full pb dn) when off center threshold going down
   } else {
     pitchBend = oldpb*0.6+8192*0.4; // released, so smooth your way back to zero
     if ((pitchBend > 8187) && (pitchBend < 8197)) pitchBend = 8192; // 8192 is 0 pitch bend, don't miss it bc of smoothing
@@ -229,11 +232,11 @@ void pitch_bend(){
 //***********************************************************
 
 void modulation(){
-  modLevel = analogRead(A0); // read voltage on analog pin A6
+  modLevel = analogRead(A6); // read voltage on analog pin A6
   if (modLevel > modsHi_Thr){
-    modLevel = map(modLevel,modsHi_Thr,modsMax,0,127); // go from 0 to full modulation when off center threshold going right(?)
+    modLevel = map(constrain(modLevel,modsHi_Thr,modsMax),modsHi_Thr,modsMax,0,127); // go from 0 to full modulation when off center threshold going right(?)
   } else if (modLevel < modsLo_Thr){
-    modLevel = map(modLevel,modsMin,modsLo_Thr,127,0); // go from 0 to full modulation when off center threshold going left(?)
+    modLevel = map(constrain(modLevel,modsMin,modsLo_Thr),modsMin,modsLo_Thr,127,0); // go from 0 to full modulation when off center threshold going left(?)
   } else {
     modLevel = 0; // zero modulation in center position
   }
@@ -247,17 +250,17 @@ void modulation(){
 
 void readSwitches(){  
   // Read switches and put value in variables
-  LH1=touchRead(17)>1800;
-  LH2=touchRead(4)>1800;
-  LH3=touchRead(3)>1800;
-  LHp1=touchRead(18)>1800;
-  RH1=touchRead(19)>1800;
-  RH2=touchRead(22)>1800;
-  RH3=touchRead(23)>1800;
-  RHp2=touchRead(1)>1800;
-  RHp3=touchRead(0)>1800;
-  OCTup=touchRead(15)>1800;
-  OCTdn=touchRead(16)>1800;
+  LH1=touchRead(17)>1500;
+  LH2=touchRead(4)>1500;
+  LH3=touchRead(3)>1500;
+  LHp1=touchRead(18)>1500;
+  RH1=touchRead(19)>1500;
+  RH2=touchRead(22)>1500;
+  RH3=touchRead(23)>1500;
+  RHp2=touchRead(1)>1500;
+  RHp3=touchRead(0)>1500;
+  OCTup=touchRead(15)>1500;
+  OCTdn=touchRead(16)>1500;
   //calculate midi note number from pressed keys  
   fingeredNote=startNote-2*LH1-LH2-(LH2 && LH1)-2*LH3+LHp1-RH1-(RH1 && LH3)-RH2-2*RH3-RHp2-2*RHp3+(RHp2 && RHp3)+12*OCTup-12*OCTdn+9*(!LH1 && LH2 && LH3);
 }

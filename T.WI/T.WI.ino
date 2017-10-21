@@ -590,7 +590,7 @@ void settings(){
           trans2 = !trans2;
           writeSetting(TRANS2_ADDR,trans2);
         }
-        if ((bin = 7) && p1 && p2){ //restore factory settings
+        if ((bin == 7) && p1 && p2){ //restore factory settings
           writeSetting(MIDI_ADDR,MIDI_FACTORY);
           writeSetting(TRANS1_ADDR,TRANS1_FACTORY);
           writeSetting(TRANS2_ADDR,TRANS2_FACTORY);

@@ -514,6 +514,24 @@ void numberBlink(byte number){
     digitalWrite(13,LOW);
     delay(200);
   }
+  if (number == 0){
+    digitalWrite(13,HIGH);
+    delay(30);
+    digitalWrite(13,LOW);
+    delay(30);
+    digitalWrite(13,HIGH);
+    delay(30);
+    digitalWrite(13,LOW);
+    delay(30);
+    digitalWrite(13,HIGH);
+    delay(30);
+    digitalWrite(13,LOW);
+    delay(30);    
+    digitalWrite(13,HIGH);
+    delay(30);
+    digitalWrite(13,LOW);
+    delay(200);
+  }
 }
 
 //***********************************************************
@@ -552,6 +570,26 @@ void settings(){
         writeSetting(MIDI_ADDR,MIDI_FACTORY);
         break;
       case 3:
+        if (bitRead(bin,0)){
+          if (portamento) portamento = 0; else portamento = 2; // portamento 2 is both switch on/off and portamento value, portamento 1 is just value
+          writeSetting(PORTAM_ADDR,portamento);
+        }
+        if (bitRead(bin,1)){
+          PB = !PB;
+          writeSetting(PB_ADDR,PB);
+        }
+        if (bitRead(bin,2)){
+          mod = !mod;
+          writeSetting(EXTRA_ADDR,mod);
+        }
+        if (p1){
+          trans1 = !trans1;
+          writeSetting(TRANS1_ADDR,trans1);
+        }
+        if (p2){
+          trans2 = !trans2;
+          writeSetting(TRANS2_ADDR,trans2);
+        }
         if ((bin = 7) && p1 && p2){ //restore factory settings
           writeSetting(MIDI_ADDR,MIDI_FACTORY);
           writeSetting(TRANS1_ADDR,TRANS1_FACTORY);
@@ -571,22 +609,6 @@ void settings(){
           PB           = readSetting(PB_ADDR);
           mod          = readSetting(EXTRA_ADDR);
           curve        = readSetting(BREATHCURVE_ADDR);
-        }
-        if (bitRead(bin,0)){
-          if (portamento) portamento = 0; else portamento = 2; // portamento 2 is both switch on/off and portamento value, portamento 1 is just value
-          writeSetting(PORTAM_ADDR,portamento);
-        }
-        if (bitRead(bin,1)){
-          PB = !PB;
-          writeSetting(PB_ADDR,PB);
-        }
-        if (p1){
-          trans1 = !trans1;
-          writeSetting(TRANS1_ADDR,trans1);
-        }
-        if (p2){
-          trans2 = !trans2;
-          writeSetting(TRANS2_ADDR,trans2);
         }
         break;
       case 4:

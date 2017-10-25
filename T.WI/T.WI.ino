@@ -45,7 +45,7 @@ HARDWARE NOTES:
 //_______________________________________________________________________________________________ DECLARATIONS
 
 #define touch_Thr 1500  // threshold for Teensy touchRead, 1300-1800
-#define ON_Thr 280      // Set threshold level before switching ON
+#define ON_Thr 300      // Set threshold level before switching ON
 #define ON_Delay   20   // Set Delay after ON threshold before velocity is checked (wait for tounging peak)
 #define breath_max 2200 // Threshold for maximum breath
 #define modsLo_Thr 1600 // Low threshold for mod stick center
@@ -239,10 +239,10 @@ void loop() {
         readSwitches();
         // We should be at tonguing peak, so set velocity based on current pressureSensor value        
         // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 1 to 127
+        breathLevel=constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max);
         breathValHires = breathCurve(map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,16383));
         velocitySend = (breathValHires >>7) & 0x007F;
         velocitySend = constrain(velocitySend,1,127);
-        breathLevel=constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max);
         breath(); // send breath data
         usbMIDI.sendNoteOn(fingeredNote, velocitySend, MIDIchannel); // send Note On message for new note 
         digitalWrite(13,HIGH);

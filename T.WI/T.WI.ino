@@ -94,12 +94,32 @@ HARDWARE NOTES:
 #define BREATH_AT_FACTORY 0       // aftertouch default off
 #define PORTAM_FACTORY 2          // 0 - OFF, 1 - ON, 2 - SW
 #define PB_FACTORY 0              // 0 - 1/2, 1 - 1/12
-#define EXTRA_FACTORY 0           // 0 - Modulation wheel, 1 - Foot pedal
+#define EXTRA_FACTORY 0           // 0 - Modulation wheel, 1 - Pitch Bend Vibrato
 #define BREATHCURVE_FACTORY 2     // 0 to 12 (-4 to +4, S1 to S4)
 #define TRANS1_FACTORY 0          // 1 - +2 semitones (C to D, F to G)
 #define TRANS2_FACTORY 0          // 1 - -7 semitones (C to F, D to G) "alto mode"
 
+#define maxSamplesNum 120
+
 //variables setup
+
+
+static int waveformsTable[maxSamplesNum] = {
+  // Sine wave
+  0x7ff, 0x86a, 0x8d5, 0x93f, 0x9a9, 0xa11, 0xa78, 0xadd, 0xb40, 0xba1,
+  0xbff, 0xc5a, 0xcb2, 0xd08, 0xd59, 0xda7, 0xdf1, 0xe36, 0xe77, 0xeb4,
+  0xeec, 0xf1f, 0xf4d, 0xf77, 0xf9a, 0xfb9, 0xfd2, 0xfe5, 0xff3, 0xffc,
+  0xfff, 0xffc, 0xff3, 0xfe5, 0xfd2, 0xfb9, 0xf9a, 0xf77, 0xf4d, 0xf1f,
+  0xeec, 0xeb4, 0xe77, 0xe36, 0xdf1, 0xda7, 0xd59, 0xd08, 0xcb2, 0xc5a,
+  0xbff, 0xba1, 0xb40, 0xadd, 0xa78, 0xa11, 0x9a9, 0x93f, 0x8d5, 0x86a,
+  0x7ff, 0x794, 0x729, 0x6bf, 0x655, 0x5ed, 0x586, 0x521, 0x4be, 0x45d,
+  0x3ff, 0x3a4, 0x34c, 0x2f6, 0x2a5, 0x257, 0x20d, 0x1c8, 0x187, 0x14a,
+  0x112, 0xdf, 0xb1, 0x87, 0x64, 0x45, 0x2c, 0x19, 0xb, 0x2,
+  0x0, 0x2, 0xb, 0x19, 0x2c, 0x45, 0x64, 0x87, 0xb1, 0xdf,
+  0x112, 0x14a, 0x187, 0x1c8, 0x20d, 0x257, 0x2a5, 0x2f6, 0x34c, 0x3a4,
+  0x3ff, 0x45d, 0x4be, 0x521, 0x586, 0x5ed, 0x655, 0x6bf, 0x729, 0x794
+};
+
 
 int state;                         // The state of the state machine
 unsigned long ccSendTime = 0L;     // The last time we sent CC values
@@ -132,15 +152,18 @@ byte portIsOn=0;     // keep track and make sure we send CC with 0 value when of
 int oldport=0;
 
 int pressureSensor;  // pressure data from breath sensor, for midi breath cc and breath threshold checks
-byte velocitySend;       // remapped midi velocity from breath sensor
+byte velocitySend;   // remapped midi velocity from breath sensor
 
 int modLevel;
 int oldmod=0;
+int lfoDepth=2;
+int lfoLevel=0;
+int lfo=0;
 
 int pitchBend;
 int oldpb=8192;
 int PB_sens;
-int modCCnumber;
+int modCCnumber = 1;
 
 int fingeredNote;    // note calculated from fingering (switches) and octave joystick position
 byte activeNote;     // note playing
@@ -211,7 +234,6 @@ void setup() {
   settings();
 
   if (PB) PB_sens = PB_sen2; else PB_sens = PB_sen1;
-  if (mod) modCCnumber = 74; else modCCnumber = 1;
   if (trans1) startNote += 2;
   if (trans2) startNote -= 7;
 }
@@ -288,8 +310,8 @@ void loop() {
   if (millis() - ccSendTime > CC_INTERVAL) {
     // deal with Breath, Pitch Bend and Modulation
     breath();
-    pitch_bend();
     modulation();
+    pitch_bend();
     ccSendTime = millis();
   }
   lastFingering=fingeredNote; 
@@ -420,6 +442,10 @@ void pitch_bend(){
     pitchBend = oldpb*0.6+8192*0.4; // released, so smooth your way back to zero
     if ((pitchBend > 8187) && (pitchBend < 8197)) pitchBend = 8192; // 8192 is 0 pitch bend, don't miss it bc of smoothing
   }
+  if (mod || (ccList[breathCC]==1)){
+    if (PB) pitchBend += lfoLevel/6; else pitchBend += lfoLevel;
+    pitchBend=constrain(pitchBend, 0, 16383);
+  }
   if (pitchBend != oldpb){// only send midi data if pitch bend has changed from previous value
     usbMIDI.sendPitchBend(pitchBend, MIDIchannel);
     oldpb=pitchBend;
@@ -436,8 +462,12 @@ void modulation(){
     modLevel = 0; // zero modulation in center position
   }
   if (modLevel != oldmod){  // only send midi data if modulation has changed from previous value
-    usbMIDI.sendControlChange(modCCnumber, modLevel, MIDIchannel);
+    if (!mod  && (ccList[breathCC] != modCCnumber)) usbMIDI.sendControlChange(modCCnumber, modLevel, MIDIchannel);
     oldmod=modLevel;
+  }
+  if (mod || (ccList[breathCC] == modCCnumber)) {
+    lfo = waveformsTable[(millis()/2)%maxSamplesNum] - 2047;
+    lfoLevel = lfo * modLevel / 1024 * lfoDepth;
   }
   if (portamento && (modRead > modsHi_Thr)) {    // if we are enabled and over the threshold, send portamento
    if (!portIsOn) {
@@ -522,11 +552,11 @@ void numberBlink(byte number){
     digitalWrite(13,HIGH);
     delay(30);
     digitalWrite(13,LOW);
-    delay(30);
+    delay(30); 
     digitalWrite(13,HIGH);
     delay(30);
     digitalWrite(13,LOW);
-    delay(30);    
+    delay(30);   
     digitalWrite(13,HIGH);
     delay(30);
     digitalWrite(13,LOW);

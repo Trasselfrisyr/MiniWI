@@ -60,3 +60,7 @@ Added optional Casio DH 2nd octave fingerings. Default disabled. Set #define cas
 2016-06-12
 
 Added tested and working version of the new TeensieWI, a simplified version for USB MIDI using the built in capacitive touch sensing in the Teensy LC and breath sensing from the MPX5010GP. Small warning here: the breath sensor output is not limited and could reach values near 5V, while the analog input on the Teensy LC is 3.3V and not rated 5V safe. To reach these levels you’d have to blow really, really hard. If you need to feel safe, go with a Teensy 3.1 or 3.2 as they have 5V tolerant inputs. Only minor alterations needed in the code for use with Teensy 3.x (touch sensing on other pins, some as pads on the back).
+
+2017-10-31
+
+Improved the joystick version of the TeensieWI, now called T.WI, with breath response curves and some other stuff that can be configured at plug-in. Started making these for sale on Tindie. https://www.tindie.com/products/yoe/twi-a-teensy-based-usb-midi-woodwind-controller/

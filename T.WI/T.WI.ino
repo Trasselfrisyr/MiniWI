@@ -1,4 +1,5 @@
 #include <EEPROM.h>
+#include <Filters.h>  // for the breath signal LP filtering, https://github.com/edgar-bonet/Filters
 
 /*
 NAME:                 T.WI
@@ -44,7 +45,7 @@ HARDWARE NOTES:
 
 //_______________________________________________________________________________________________ DECLARATIONS
 
-#define touch_Thr 1500  // threshold for Teensy touchRead, 1300-1800
+#define touch_Thr 1300  // threshold for Teensy touchRead, 1300-1800
 #define ON_Thr 300      // Set threshold level before switching ON
 #define ON_Delay   20   // Set Delay after ON threshold before velocity is checked (wait for tounging peak)
 #define breath_max 2200 // Threshold for maximum breath
@@ -169,6 +170,7 @@ int fingeredNote;    // note calculated from fingering (switches) and octave joy
 byte activeNote;     // note playing
 byte startNote=73;   // set startNote to C# (change this value in steps of 12 to start in other octaves)
 
+float filterFreq = 30.0; 
 
             // Key variables, TRUE (1) for pressed, FALSE (0) for not pressed
 byte LH1;   // Left Hand key 1 (pitch change -2) 
@@ -241,80 +243,86 @@ void setup() {
 //_______________________________________________________________________________________________ MAIN LOOP
 
 void loop() {
+  mainLoop();
+}
+void mainLoop() {  
+  FilterOnePole breathFilter( LOWPASS, filterFreq );   // create a one pole (RC) lowpass filter
+  while(1){
+    breathFilter.input(analogRead(A7));
+    pressureSensor = constrain((int)breathFilter.output(),0,4095); // Get the filtered pressure sensor reading from analog pin A7, input from sensor MP3V5004GP
   
-  pressureSensor = analogRead(A7); // Get the pressure sensor reading from analog pin A7
-
-  if (state == NOTE_OFF) {
-    if (pressureSensor > ON_Thr) {
-      // Value has risen above threshold. Move to the ON_Delay
-      // state. Record time and initial breath value.
-      breath_on_time = millis();
-      initial_breath_value = pressureSensor;
-      state = RISE_WAIT;  // Go to next state
-    }
-  } else if (state == RISE_WAIT) {
-    if (pressureSensor > ON_Thr) {
-      // Has enough time passed for us to collect our second
-      // sample?
-      if (millis() - breath_on_time > ON_Delay) {
-        // Yes, so calculate MIDI note and velocity, then send a note on event
-        readSwitches();
-        // We should be at tonguing peak, so set velocity based on current pressureSensor value        
-        // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 1 to 127
-        breathLevel=constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max);
-        breathValHires = breathCurve(map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,16383));
-        velocitySend = (breathValHires >>7) & 0x007F;
-        velocitySend = constrain(velocitySend,1,127);
-        breath(); // send breath data
-        usbMIDI.sendNoteOn(fingeredNote, velocitySend, MIDIchannel); // send Note On message for new note 
-        digitalWrite(13,HIGH);
-        activeNote=fingeredNote;
-        state = NOTE_ON;
+    if (state == NOTE_OFF) {
+      if (pressureSensor > ON_Thr) {
+        // Value has risen above threshold. Move to the ON_Delay
+        // state. Record time and initial breath value.
+        breath_on_time = millis();
+        initial_breath_value = pressureSensor;
+        state = RISE_WAIT;  // Go to next state
       }
-    } else {
-      // Value fell below threshold before ON_Delay passed. Return to
-      // NOTE_OFF state (e.g. we're ignoring a short blip of breath)
-      state = NOTE_OFF;
-    }
-  } else if (state == NOTE_ON) {
-    if (pressureSensor < ON_Thr) {
-      // Value has fallen below threshold - turn the note off
-      usbMIDI.sendNoteOff(activeNote, velocitySend, MIDIchannel); //  send Note Off message 
-      digitalWrite(13,LOW);
-      breathLevel=0;
-      state = NOTE_OFF;
-    } else {
-      readSwitches();
-      if (fingeredNote != lastFingering){ //
-        // reset the debouncing timer
-        lastDebounceTime = millis();
-      }
-      if ((millis() - lastDebounceTime) > debounceDelay) {
-      // whatever the reading is at, it's been there for longer
-      // than the debounce delay, so take it as the actual current state
-        if (fingeredNote != activeNote) {
-          // Player has moved to a new fingering while still blowing.
-          // Send a note off for the current note and a note on for
-          // the new note.      
+    } else if (state == RISE_WAIT) {
+      if (pressureSensor > ON_Thr) {
+        // Has enough time passed for us to collect our second
+        // sample?
+        if (millis() - breath_on_time > ON_Delay) {
+          // Yes, so calculate MIDI note and velocity, then send a note on event
+          readSwitches();
+          // We should be at tonguing peak, so set velocity based on current pressureSensor value        
+          // If initial value is greater than value after delay, go with initial value, constrain input to keep mapped output within 1 to 127
+          breathLevel=constrain(max(pressureSensor,initial_breath_value),ON_Thr,breath_max);
           breathValHires = breathCurve(map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,16383));
           velocitySend = (breathValHires >>7) & 0x007F;
-          velocitySend = constrain(velocitySend,1,127); // set new velocity value based on current pressure sensor level
-          usbMIDI.sendNoteOn(fingeredNote, velocitySend, MIDIchannel); // send Note On message for new note         
-          usbMIDI.sendNoteOff(activeNote, 0, MIDIchannel); // send Note Off message for previous note (legato)
+          velocitySend = constrain(velocitySend,1,127);
+          breath(); // send breath data
+          usbMIDI.sendNoteOn(fingeredNote, velocitySend, MIDIchannel); // send Note On message for new note 
+          digitalWrite(13,HIGH);
           activeNote=fingeredNote;
+          state = NOTE_ON;
+        }
+      } else {
+        // Value fell below threshold before ON_Delay passed. Return to
+        // NOTE_OFF state (e.g. we're ignoring a short blip of breath)
+        state = NOTE_OFF;
+      }
+    } else if (state == NOTE_ON) {
+      if (pressureSensor < ON_Thr) {
+        // Value has fallen below threshold - turn the note off
+        usbMIDI.sendNoteOff(activeNote, velocitySend, MIDIchannel); //  send Note Off message 
+        digitalWrite(13,LOW);
+        breathLevel=0;
+        state = NOTE_OFF;
+      } else {
+        readSwitches();
+        if (fingeredNote != lastFingering){ //
+          // reset the debouncing timer
+          lastDebounceTime = millis();
+        }
+        if ((millis() - lastDebounceTime) > debounceDelay) {
+        // whatever the reading is at, it's been there for longer
+        // than the debounce delay, so take it as the actual current state
+          if (fingeredNote != activeNote) {
+            // Player has moved to a new fingering while still blowing.
+            // Send a note off for the current note and a note on for
+            // the new note.      
+            breathValHires = breathCurve(map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,16383));
+            velocitySend = (breathValHires >>7) & 0x007F;
+            velocitySend = constrain(velocitySend,1,127); // set new velocity value based on current pressure sensor level
+            usbMIDI.sendNoteOn(fingeredNote, velocitySend, MIDIchannel); // send Note On message for new note         
+            usbMIDI.sendNoteOff(activeNote, 0, MIDIchannel); // send Note Off message for previous note (legato)
+            activeNote=fingeredNote;
+          }
         }
       }
     }
+    // Is it time to send more CC data?
+    if (millis() - ccSendTime > CC_INTERVAL) {
+      // deal with Breath, Pitch Bend and Modulation
+      breath();
+      modulation();
+      pitch_bend();
+      ccSendTime = millis();
+    }
+    lastFingering=fingeredNote; 
   }
-  // Is it time to send more CC data?
-  if (millis() - ccSendTime > CC_INTERVAL) {
-    // deal with Breath, Pitch Bend and Modulation
-    breath();
-    modulation();
-    pitch_bend();
-    ccSendTime = millis();
-  }
-  lastFingering=fingeredNote; 
 }
 //_______________________________________________________________________________________________ FUNCTIONS
 
@@ -404,7 +412,7 @@ unsigned int breathCurve(unsigned int inputVal){
 void breath(){
   int breathCCval,breathCCvalFine;
   unsigned int breathCCvalHires;
-  breathLevel = breathLevel*0.8+pressureSensor*0.2; // smoothing of breathLevel value
+  breathLevel = constrain(pressureSensor,ON_Thr,breath_max);
   //breathCCval = map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,127);
   breathCCvalHires = breathCurve(map(constrain(breathLevel,ON_Thr,breath_max),ON_Thr,breath_max,0,16383));
   breathCCval = (breathCCvalHires >>7) & 0x007F;

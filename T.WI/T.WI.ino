@@ -45,7 +45,7 @@ HARDWARE NOTES:
 
 //_______________________________________________________________________________________________ DECLARATIONS
 
-#define touch_Thr 1300  // threshold for Teensy touchRead, 1300-1800
+#define touch_Thr 1500  // threshold for Teensy touchRead, 1300-1800
 #define ON_Thr 300      // Set threshold level before switching ON
 #define ON_Delay   20   // Set Delay after ON threshold before velocity is checked (wait for tounging peak)
 #define breath_max 2200 // Threshold for maximum breath
